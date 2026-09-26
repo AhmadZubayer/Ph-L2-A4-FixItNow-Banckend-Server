@@ -1,8 +1,8 @@
-node_modules
-dist
-generated
+node_modules/
+dist/
+generated/
+logs/
 .env
-/generated/prisma
 /generated/prisma
 .agents
 .claude

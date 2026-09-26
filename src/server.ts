@@ -1,20 +1,27 @@
-import dotenv from "dotenv";
-import path from "path";
+import "dotenv/config";
+import config from "./config";
+import { prisma } from "./lib/prisma";
+import { logger } from "./lib/pino_logger";
 
+const PORT = config.port;
 
-dotenv.config({path: path.join(process.cwd(), ".env") });
+async function main() {
+    try {
+        if (process.env.NODE_ENV !== "production") {
+            await import(new URL("../swagger.mjs", import.meta.url).href);
+        }
 
-
-export default {
-    port : process.env.PORT,
-    database_url : process.env.DATABASE_URL,
-    app_url : process.env.APP_URL,
-    bcrypt_salt_rounds : process.env.BCRYPT_SALT_ROUNDS,
-    jwt_access_secret : process.env.JWT_ACCESS_SECRET!,
-    jwt_refresh_secret : process.env.JWT_REFRESH_SECRET!,
-    jwt_access_expires_in : process.env.JWT_ACCESS_EXPIRES_IN!,
-    jwt_refresh_expires_in : process.env.JWT_REFRESH_EXPIRES_IN!,
-    stripe_product_price_id : process.env.STRIPE_PRODUCT_PRICE_ID!,
-    stripe_secret_key : process.env.STRIPE_SECRET_KEY!,
-    stripe_webhook_secret : process.env.STRIPE_WEBHOOK_SECRET!
+        const { default: app } = await import("./app");
+        await prisma.$connect();
+        logger.info("Connected to the Prisma database successfully.");
+       app.listen(PORT, () => {
+        logger.info({ port: PORT }, "Server is running");
+       }) 
+    } catch (error) {
+        logger.error({ err: error }, "Error starting the server");
+        await prisma.$disconnect();
+        process.exit(1);
+    }
 }
+
+main();
