@@ -3,3 +3,7 @@ dist
 generated
 .env
 /generated/prisma
+/generated/prisma
+.agents
+.claude
+.windsurf
