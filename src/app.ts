@@ -12,7 +12,7 @@ import { authRoutes } from "./modules/auth/auth.routes";
 import { adminCategoryRoutes, categoryRoutes } from "./modules/category/category.route";
 import { publicTechnicianRoutes, technicianRoutes } from "./modules/technician/technician.route";
 import { serviceRoutes, technicianServiceRoutes } from "./modules/service/service.route";
-
+import { availabilityRoutes } from "./modules/availability/availability.route";
 
 const app : Application = express();
 
@@ -40,6 +40,7 @@ app.use("/api/technician", technicianRoutes);
 app.use("/api/technician/services", technicianServiceRoutes);
 app.use("/api/technicians", publicTechnicianRoutes);
 app.use("/api/services", serviceRoutes);
+app.use("/api/technician/availability", availabilityRoutes);
 
 app.use(notFound);
 app.use(globalErrorHandler);
