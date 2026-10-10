@@ -13,6 +13,7 @@ import { adminCategoryRoutes, categoryRoutes } from "./modules/category/category
 import { publicTechnicianRoutes, technicianRoutes } from "./modules/technician/technician.route";
 import { serviceRoutes, technicianServiceRoutes } from "./modules/service/service.route";
 import { availabilityRoutes } from "./modules/availability/availability.route";
+import { bookingRoutes, technicianBookingRoutes } from "./modules/booking/booking.route";
 
 const app : Application = express();
 
@@ -41,6 +42,8 @@ app.use("/api/technician/services", technicianServiceRoutes);
 app.use("/api/technicians", publicTechnicianRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/technician/availability", availabilityRoutes);
+app.use("/api/bookings", bookingRoutes);
+app.use("/api/technician/bookings", technicianBookingRoutes);
 
 app.use(notFound);
 app.use(globalErrorHandler);
