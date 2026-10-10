@@ -4,6 +4,11 @@ model User {
   email        String   @unique
   passwordHash String
   role         UserRole @default(CUSTOMER)
+  activeStatus ActiveStatus @default(ACTIVE)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  technicianProfile TechnicianProfile?
+  customerBookings Booking[]
+  reviews Review[]
 }

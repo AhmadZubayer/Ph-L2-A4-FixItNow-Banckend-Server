@@ -1,0 +1,17 @@
+model AvailabilitySlot {
+  id       String   @id @default(uuid())
+  startAt  DateTime
+  endAt    DateTime
+  isActive Boolean  @default(true)
+
+  technicianProfileId String
+  technicianProfile   TechnicianProfile @relation(fields: [technicianProfileId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings Booking[]
+
+  @@index([technicianProfileId, startAt]) //Helps find a specific technician's slots by start time faster
+  @@map("availability_slots")
+}

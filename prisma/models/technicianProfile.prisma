@@ -1,0 +1,20 @@
+model TechnicianProfile {
+  id              String   @id @default(uuid())
+  bio             String?  @db.Text
+  skills          String[]
+  experienceYears Int      @default(0)
+  location        String
+  profilePhoto    String?
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  services Service[]
+  availabilitySlots AvailabilitySlot[]
+  reviews Review[]
+
+  @@map("technician_profiles")
+}

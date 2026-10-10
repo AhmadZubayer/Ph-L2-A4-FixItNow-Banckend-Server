@@ -1,0 +1,20 @@
+model Review {
+  id      String  @id @default(uuid())
+  rating  Int
+  comment String? @db.Text
+
+  customerId String
+  customer   User   @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  technicianProfileId String
+  technicianProfile   TechnicianProfile @relation(fields: [technicianProfileId], references: [id], onDelete: Restrict)
+
+  bookingId String  @unique
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([technicianProfileId])
+  @@map("reviews")
+}
