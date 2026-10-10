@@ -5,3 +5,11 @@ export interface ICreateService {
     durationMinutes: number;
     categoryId: string;
 }
+
+export interface IServiceFilters {
+    categoryId?: string;
+    location?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    minRating?: number;
+}

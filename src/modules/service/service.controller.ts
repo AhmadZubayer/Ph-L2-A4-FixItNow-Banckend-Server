@@ -4,6 +4,7 @@ import { AppError } from "../../utils/appError";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { serviceService } from "./service.service";
+import { IServiceFilters } from "./service.interface";
 
 const createService = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
@@ -23,7 +24,9 @@ const createService = catchAsync(async (req: Request, res: Response, next: NextF
 });
 
 const getAllServices = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const services = await serviceService.getAllServicesFromDB();
+    const filters = res.locals.validatedQuery as IServiceFilters;
+
+    const services = await serviceService.getAllServicesFromDB(filters);
 
     sendResponse(res, {
         success: true,
