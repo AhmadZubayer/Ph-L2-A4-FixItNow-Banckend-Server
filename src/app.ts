@@ -6,6 +6,8 @@ import swaggerUi from "swagger-ui-express";
 import { swaggerDocument } from "./docs/swagger";
 import pinoHttp from "pino-http";
 import { logger } from "./lib/pino_logger";
+import { globalErrorHandler } from "./middlewares/globalErrorHandler";
+import { notFound } from "./middlewares/notFound";
 
 const app : Application = express();
 
@@ -25,5 +27,7 @@ app.get("/",(req : Request, res : Response) => {
 
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use(notFound);
+app.use(globalErrorHandler);
 
 export default app;
