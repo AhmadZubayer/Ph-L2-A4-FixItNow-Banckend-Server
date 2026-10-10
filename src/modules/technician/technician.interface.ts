@@ -6,3 +6,8 @@ export interface IUpdateTechnicianProfile {
     profilePhoto?: string;
 }
 
+export interface ITechnicianFilters {
+    categoryId?: string;
+    location?: string;
+    minRating?: number;
+}

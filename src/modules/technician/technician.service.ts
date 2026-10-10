@@ -1,8 +1,9 @@
 import { prisma } from "../../lib/prisma";
-import { IUpdateTechnicianProfile } from "./technician.interface";
+import { ITechnicianFilters, IUpdateTechnicianProfile } from "./technician.interface";
 import { ActiveStatus } from "../../../generated/prisma/enums";
 import httpStatus from "http-status";
 import { AppError } from "../../utils/appError";
+import { Prisma } from "../../../generated/prisma/client";
 
 const updateTechnicianProfileIntoDB = async (userId: string, payload: IUpdateTechnicianProfile) => {
     const profile = await prisma.technicianProfile.upsert({
@@ -97,13 +98,34 @@ const getTechnicianByIdFromDB = async (id: string) => {
     };
 }
 
-const getAllTechniciansFromDB = async () => {
-    const technicians = await prisma.technicianProfile.findMany({
-        where: {
-            user: {
-                activeStatus: ActiveStatus.ACTIVE
+const getAllTechniciansFromDB = async (filters: ITechnicianFilters = {}) => {
+    const where: Prisma.TechnicianProfileWhereInput = {
+        user: {
+            activeStatus: ActiveStatus.ACTIVE
+        }
+    };
+
+    if (filters.categoryId) {
+        where.services = {
+            some: {
+                isActive: true,
+                categoryId: filters.categoryId,
+                category: {
+                    isActive: true
+                }
             }
-        },
+        };
+    }
+
+    if (filters.location) {
+        where.location = {
+            contains: filters.location,
+            mode: "insensitive"
+        };
+    }
+
+    const technicians = await prisma.technicianProfile.findMany({
+        where,
         select: {
             id: true,
             bio: true,
@@ -142,7 +164,55 @@ const getAllTechniciansFromDB = async () => {
         }
     });
 
-    return technicians;
+        if (technicians.length === 0) {
+        return [];
+    }
+
+    // Calculate an average rating for each technician in the list.
+    const ratings = await prisma.review.groupBy({
+        by: ["technicianProfileId"],
+        where: {
+            technicianProfileId: {
+                in: technicians.map(technician => technician.id)
+            }
+        },
+        _avg: {
+            rating: true
+        },
+        _count: {
+            rating: true
+        }
+    });
+
+    const ratingMap = new Map<string, { averageRating: number; reviewCount: number }>();
+
+    for (const rating of ratings) {
+        ratingMap.set(rating.technicianProfileId, {
+            averageRating: rating._avg.rating ?? 0,
+            reviewCount: rating._count.rating
+        });
+    }
+
+    // Add the rating numbers to each technician.
+    const techniciansWithRatings = technicians.map(technician => {
+        const rating = ratingMap.get(technician.id);
+
+        return {
+            ...technician,
+            averageRating: rating?.averageRating ?? 0,
+            reviewCount: rating?.reviewCount ?? 0
+        };
+    });
+
+    const minRating = filters.minRating;
+
+    if (minRating !== undefined) {
+        return techniciansWithRatings.filter(
+            technician => technician.averageRating >= minRating
+        );
+    }
+
+    return techniciansWithRatings;
 }
 
 export const technicianService = {

@@ -4,6 +4,7 @@ import { AppError } from "../../utils/appError";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { technicianService } from "./technician.service";
+import { ITechnicianFilters } from "./technician.interface";
 
 const updateTechnicianProfile = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
@@ -24,7 +25,9 @@ const updateTechnicianProfile = catchAsync(async (req: Request, res: Response, n
 });
 
 const getAllTechnicians = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const technicians = await technicianService.getAllTechniciansFromDB();
+    const filters = res.locals.validatedQuery as ITechnicianFilters;
+
+    const technicians = await technicianService.getAllTechniciansFromDB(filters);
 
     sendResponse(res, {
         success: true,
