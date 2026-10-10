@@ -7,6 +7,12 @@ const registerUserSchema = z.object({
     role: z.enum(["CUSTOMER", "TECHNICIAN"])
 });
 
+const loginUserSchema = z.object({
+    email: z.email("A valid email is required"),
+    password: z.string().min(1, "Password is required")
+});
+
 export const authValidation = {
-    registerUserSchema
+    registerUserSchema,
+    loginUserSchema
 }

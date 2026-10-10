@@ -10,3 +10,9 @@ authRoutes.post(
     validateRequest(authValidation.registerUserSchema),
     authController.registerUser
 );
+
+authRoutes.post(
+    "/login",
+    validateRequest(authValidation.loginUserSchema),
+    authController.loginUser
+);
