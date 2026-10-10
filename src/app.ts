@@ -8,6 +8,7 @@ import pinoHttp from "pino-http";
 import { logger } from "./lib/pino_logger";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import { notFound } from "./middlewares/notFound";
+import { authRoutes } from "./modules/auth/auth.routes";
 
 const app : Application = express();
 
@@ -27,6 +28,9 @@ app.get("/",(req : Request, res : Response) => {
 
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+app.use("/api/auth", authRoutes);
+
 app.use(notFound);
 app.use(globalErrorHandler);
 
