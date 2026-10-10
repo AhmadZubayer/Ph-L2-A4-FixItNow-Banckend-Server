@@ -34,7 +34,21 @@ const getAllTechnicians = catchAsync(async (req: Request, res: Response, next: N
     });
 });
 
+const getTechnicianById = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = res.locals.validatedParams as { id: string };
+
+    const technician = await technicianService.getTechnicianByIdFromDB(id);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Technician retrieved successfully",
+        data: technician
+    });
+});
+
 export const technicianController = {
     updateTechnicianProfile,
-    getAllTechnicians
+    getAllTechnicians,
+    getTechnicianById
 }

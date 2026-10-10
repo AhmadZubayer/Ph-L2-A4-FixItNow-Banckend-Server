@@ -10,6 +10,11 @@ const updateTechnicianProfileSchema = z.object({
     profilePhoto: z.url().optional()
 });
 
+const getTechnicianParamsSchema = z.object({
+    id: z.uuid("A valid technician ID is required")
+});
+
 export const technicianValidation = {
-    updateTechnicianProfileSchema
+    updateTechnicianProfileSchema,
+    getTechnicianParamsSchema
 }
