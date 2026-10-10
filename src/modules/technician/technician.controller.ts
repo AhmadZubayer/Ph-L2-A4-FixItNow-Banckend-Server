@@ -23,6 +23,18 @@ const updateTechnicianProfile = catchAsync(async (req: Request, res: Response, n
     });
 });
 
+const getAllTechnicians = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const technicians = await technicianService.getAllTechniciansFromDB();
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Technicians retrieved successfully",
+        data: technicians
+    });
+});
+
 export const technicianController = {
-    updateTechnicianProfile
+    updateTechnicianProfile,
+    getAllTechnicians
 }

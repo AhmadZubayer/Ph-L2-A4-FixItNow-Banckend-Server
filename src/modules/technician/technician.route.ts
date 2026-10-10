@@ -6,10 +6,16 @@ import { technicianController } from "./technician.controller";
 import { technicianValidation } from "./technician.validation";
 
 export const technicianRoutes = Router();
+export const publicTechnicianRoutes = Router();
 
 technicianRoutes.put(
     "/profile",
     auth(UserRole.TECHNICIAN),
     validateRequest(technicianValidation.updateTechnicianProfileSchema),
     technicianController.updateTechnicianProfile
+);
+
+publicTechnicianRoutes.get(
+    "/",
+    technicianController.getAllTechnicians
 );
