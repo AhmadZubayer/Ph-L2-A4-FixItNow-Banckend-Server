@@ -87,7 +87,46 @@ const loginUser = async (payload: ILoginUser) => {
     };
 }
 
+const refreshToken = async (token: string) => {
+    const verifiedToken = jwtUtils.verifyToken(token, config.jwt_refresh_secret);
+    const decoded = verifiedToken.data;
+
+    if (!verifiedToken.success || typeof decoded !== "object" || decoded === null || typeof decoded.id !== "string") {
+        throw new AppError(httpStatus.UNAUTHORIZED, "Invalid or expired refresh token");
+    }
+
+    const user = await prisma.user.findUnique({
+        where: {
+            id: decoded.id
+        }
+    });
+
+    if (!user) {
+        throw new AppError(httpStatus.UNAUTHORIZED, "User not found. Please log in again");
+    }
+
+    if (user.activeStatus === ActiveStatus.BLOCKED) {
+        throw new AppError(httpStatus.FORBIDDEN, "Your account has been blocked");
+    }
+
+    const jwtPayload = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+    };
+
+    const accessToken = jwtUtils.createToken(
+        jwtPayload,
+        config.jwt_access_secret,
+        config.jwt_access_expires_in as SignOptions["expiresIn"]
+    );
+
+    return { accessToken };
+}
+
 export const authService = {
     registerUserIntoDB,
-    loginUser
+    loginUser,
+    refreshToken
 }

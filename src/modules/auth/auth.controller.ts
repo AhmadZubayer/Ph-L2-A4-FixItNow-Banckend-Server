@@ -3,6 +3,7 @@ import httpStatus from "http-status";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { authService } from "./auth.services";
+import { AppError } from "../../utils/appError";
 
 const registerUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
@@ -33,7 +34,37 @@ const loginUser = catchAsync(async (req: Request, res: Response, next: NextFunct
     });
 });
 
+const refreshToken = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.body.refreshToken;
+
+    const { accessToken } = await authService.refreshToken(token);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Access token refreshed successfully",
+        data: {
+            accessToken
+        }
+    });
+});
+
+const getMe = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+        throw new AppError(httpStatus.UNAUTHORIZED, "Please log in to access this resource");
+    }
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Current user retrieved successfully",
+        data: req.user
+    });
+});
+
 export const authController = {
     registerUser,
-    loginUser
+    loginUser,
+    refreshToken,
+    getMe
 }

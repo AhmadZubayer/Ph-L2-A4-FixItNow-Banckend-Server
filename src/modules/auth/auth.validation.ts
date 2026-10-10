@@ -12,7 +12,12 @@ const loginUserSchema = z.object({
     password: z.string().min(1, "Password is required")
 });
 
+const refreshTokenSchema = z.object({
+    refreshToken: z.string().trim().min(1, "Refresh token is required")
+});
+
 export const authValidation = {
     registerUserSchema,
-    loginUserSchema
+    loginUserSchema,
+    refreshTokenSchema
 }
