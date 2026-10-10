@@ -2,6 +2,7 @@ import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/appError";
 import { ICreateService } from "./service.interface";
+import { ActiveStatus } from "../../../generated/prisma/enums";
 
 const createServiceIntoDB = async (userId: string, payload: ICreateService) => {
     const technicianProfile = await prisma.technicianProfile.findUnique({
@@ -35,6 +36,50 @@ const createServiceIntoDB = async (userId: string, payload: ICreateService) => {
     return service;
 }
 
+const getAllServicesFromDB = async () => {
+    const services = await prisma.service.findMany({
+        where: {
+            isActive: true,
+            category: {
+                isActive: true
+            },
+            technicianProfile: {
+                user: {
+                    activeStatus: ActiveStatus.ACTIVE
+                }
+            }
+        },
+        include: {
+            category: {
+                select: {
+                    id: true,
+                    name: true,
+                    slug: true
+                }
+            },
+            technicianProfile: {
+                select: {
+                    id: true,
+                    location: true,
+                    experienceYears: true,
+                    user: {
+                        select: {
+                            id: true,
+                            name: true
+                        }
+                    }
+                }
+            }
+        },
+        orderBy: {
+            createdAt: "desc"
+        }
+    });
+
+    return services;
+}
+
 export const serviceService = {
-    createServiceIntoDB
+    createServiceIntoDB,
+    getAllServicesFromDB
 }

@@ -11,7 +11,7 @@ import { notFound } from "./middlewares/notFound";
 import { authRoutes } from "./modules/auth/auth.routes";
 import { adminCategoryRoutes, categoryRoutes } from "./modules/category/category.route";
 import { technicianRoutes } from "./modules/technician/technician.route";
-import { technicianServiceRoutes } from "./modules/service/service.route";
+import { serviceRoutes, technicianServiceRoutes } from "./modules/service/service.route";
 
 const app : Application = express();
 
@@ -37,6 +37,7 @@ app.use("/api/admin/categories", adminCategoryRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/technician", technicianRoutes);
 app.use("/api/technician/services", technicianServiceRoutes);
+app.use("/api/services", serviceRoutes);
 
 app.use(notFound);
 app.use(globalErrorHandler);

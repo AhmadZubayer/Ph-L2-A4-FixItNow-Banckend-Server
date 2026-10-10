@@ -6,10 +6,16 @@ import { serviceController } from "./service.controller";
 import { serviceValidation } from "./service.validation";
 
 export const technicianServiceRoutes = Router();
+export const serviceRoutes = Router();
 
 technicianServiceRoutes.post(
     "/",
     auth(UserRole.TECHNICIAN),
     validateRequest(serviceValidation.createServiceSchema),
     serviceController.createService
+);
+
+serviceRoutes.get(
+    "/",
+    serviceController.getAllServices
 );
