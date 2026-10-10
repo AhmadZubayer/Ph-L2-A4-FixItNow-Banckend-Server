@@ -17,6 +17,30 @@ const createCategory = catchAsync(async (req: Request, res: Response, next: Next
     });
 });
 
+const getAllCategories = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const categories = await categoryService.getAllCategoriesFromDB();
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Categories retrieved successfully",
+        data: categories
+    });
+});
+
+const getAllCategoriesForAdmin = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const categories = await categoryService.getAllCategoriesForAdminFromDB();
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Categories retrieved successfully",
+        data: categories
+    });
+});
+
 export const categoryController = {
-    createCategory
+    createCategory,
+    getAllCategories,
+    getAllCategoriesForAdmin
 }

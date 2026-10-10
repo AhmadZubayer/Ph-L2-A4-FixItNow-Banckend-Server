@@ -9,7 +9,7 @@ import { logger } from "./lib/pino_logger";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import { notFound } from "./middlewares/notFound";
 import { authRoutes } from "./modules/auth/auth.routes";
-import { adminCategoryRoutes } from "./modules/category/category.route";
+import { adminCategoryRoutes, categoryRoutes } from "./modules/category/category.route";
 
 const app : Application = express();
 
@@ -32,6 +32,7 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/admin/categories", adminCategoryRoutes);
+app.use("/api/categories", categoryRoutes);
 
 app.use(notFound);
 app.use(globalErrorHandler);
