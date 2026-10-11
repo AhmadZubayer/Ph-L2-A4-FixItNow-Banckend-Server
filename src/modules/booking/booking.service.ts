@@ -1,5 +1,6 @@
 import httpStatus from "http-status";
-import { ActiveStatus, BookingStatus } from "../../../generated/prisma/enums";
+import { ActiveStatus, BookingStatus, PaymentStatus } from "../../../generated/prisma/enums";
+import { paymentService } from "../payment/payment.service";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/appError";
 import { ICreateBooking } from "./booking.interface";
@@ -333,12 +334,10 @@ const updateBookingStatusIntoDB = async (
     });
 }
 
-// Customer and booking ID 
-// → check ownership and that the booking is REQUESTED or ACCEPTED 
-// → mark it CANCELLED 
-// → reopen its future slot.
+// Check the customer's booking and cancel it in a transaction.
+// If it was paid, request the refund after the transaction finishes.
 const cancelBookingIntoDB = async (id: string, customerId: string) => {
-    return prisma.$transaction(async transaction => {
+    const result = await prisma.$transaction(async transaction => {
         const booking = await transaction.booking.findFirst({
             where: {
                 id,
@@ -348,7 +347,16 @@ const cancelBookingIntoDB = async (id: string, customerId: string) => {
                 id: true,
                 status: true,
                 startAt: true,
-                availabilitySlotId: true
+                availabilitySlotId: true,
+                payments: {
+                    where: {
+                        status: PaymentStatus.COMPLETED
+                    },
+                    select: {
+                        id: true
+                    },
+                    take: 1
+                }
             }
         });
 
@@ -356,11 +364,27 @@ const cancelBookingIntoDB = async (id: string, customerId: string) => {
             throw new AppError(httpStatus.NOT_FOUND, "Booking not found");
         }
 
+        if (booking.status === BookingStatus.CANCELLED) {
+            return {
+                cancelledBooking: await transaction.booking.findUniqueOrThrow({
+                    where: {
+                        id: booking.id
+                    }
+                }),
+                shouldRefund: booking.payments.length > 0
+            };
+        }
+
         if (
             booking.status !== BookingStatus.REQUESTED &&
-            booking.status !== BookingStatus.ACCEPTED
+            booking.status !== BookingStatus.ACCEPTED &&
+            booking.status !== BookingStatus.PAID
         ) {
             throw new AppError(httpStatus.CONFLICT, "This booking cannot be cancelled");
+        }
+
+        if (booking.status === BookingStatus.PAID && booking.payments.length === 0) {
+            throw new AppError(httpStatus.CONFLICT, "Paid booking payment was not found");
         }
 
         const updated = await transaction.booking.updateMany({
@@ -377,7 +401,6 @@ const cancelBookingIntoDB = async (id: string, customerId: string) => {
             throw new AppError(httpStatus.CONFLICT, "Booking status changed. Please try again");
         }
 
-        // Offer the slot again if its start time is still in the future.
         if (booking.startAt > new Date()) {
             await transaction.availabilitySlot.updateMany({
                 where: {
@@ -401,12 +424,21 @@ const cancelBookingIntoDB = async (id: string, customerId: string) => {
             });
         }
 
-        return transaction.booking.findUniqueOrThrow({
-            where: {
-                id: booking.id
-            }
-        });
+        return {
+            cancelledBooking: await transaction.booking.findUniqueOrThrow({
+                where: {
+                    id: booking.id
+                }
+            }),
+            shouldRefund: booking.status === BookingStatus.PAID
+        };
     });
+
+    if (result.shouldRefund) {
+        await paymentService.refundCancelledPaidBookingIntoDB(id);
+    }
+
+    return result.cancelledBooking;
 }
 
 export const bookingService = {

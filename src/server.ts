@@ -7,10 +7,6 @@ const PORT = config.port;
 
 async function main() {
     try {
-        if (process.env.NODE_ENV !== "production") {
-            await import(new URL("../swagger.mjs", import.meta.url).href);
-        }
-
         const { default: app } = await import("./app");
         await prisma.$connect();
         logger.info("Connected to the Prisma database successfully.");

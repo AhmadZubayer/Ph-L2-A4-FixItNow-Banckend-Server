@@ -3,7 +3,7 @@ import config from "./config";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import swaggerUi from "swagger-ui-express";
-import { swaggerDocument } from "./docs/swagger";
+import { swaggerDocument } from "../swagger";
 import pinoHttp from "pino-http";
 import { logger } from "./lib/pino_logger";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler";
