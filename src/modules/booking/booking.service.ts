@@ -4,6 +4,18 @@ import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/appError";
 import { ICreateBooking } from "./booking.interface";
 
+// createBookingIntoDB
+// getMyBookingsFromDB
+// getBookingByIdFromDB
+// getTechnicianBookingsFromDB
+// updateBookingStatusIntoDB
+// cancelBookingIntoDB
+
+
+// Customer and selected service/slot 
+// → check that booking is allowed 
+// → claim the slot 
+// → create a REQUESTED booking.
 const createBookingIntoDB = async (customerId: string, payload: ICreateBooking) => {
     const activeBookingStatuses = [
         BookingStatus.REQUESTED,
@@ -232,6 +244,10 @@ const getTechnicianBookingsFromDB = async (technicianUserId: string) => {
     });
 }
 
+// Technician and requested status 
+// → check booking ownership and allowed status change 
+// → update the booking 
+// → reopen a future slot if declined.
 const updateBookingStatusIntoDB = async (
     id: string,
     technicianUserId: string,
@@ -317,6 +333,10 @@ const updateBookingStatusIntoDB = async (
     });
 }
 
+// Customer and booking ID 
+// → check ownership and that the booking is REQUESTED or ACCEPTED 
+// → mark it CANCELLED 
+// → reopen its future slot.
 const cancelBookingIntoDB = async (id: string, customerId: string) => {
     return prisma.$transaction(async transaction => {
         const booking = await transaction.booking.findFirst({
