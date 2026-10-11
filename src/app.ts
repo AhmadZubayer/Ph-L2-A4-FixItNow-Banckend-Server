@@ -14,6 +14,7 @@ import { publicTechnicianRoutes, technicianRoutes } from "./modules/technician/t
 import { serviceRoutes, technicianServiceRoutes } from "./modules/service/service.route";
 import { availabilityRoutes } from "./modules/availability/availability.route";
 import { bookingRoutes, technicianBookingRoutes } from "./modules/booking/booking.route";
+import { stripeWebhookRoutes } from "./modules/payment/providers/stripe/stripe.route";
 
 const app : Application = express();
 
@@ -22,6 +23,7 @@ app.use(cors({
     credentials : true,
 }))
 
+app.use("/api/payments/webhook", stripeWebhookRoutes);
 app.use(express.json());
 app.use(express.urlencoded({ extended : true }));
 app.use(cookieParser());

@@ -2,6 +2,7 @@ model Payment {
   id                    String          @id @default(uuid())
   transactionId         String          @unique @default(uuid())
   providerTransactionId String?         @unique
+  providerRefundId      String?         @unique
   amount                Decimal         @db.Decimal(10, 2)
   method                String?
   provider              PaymentProvider
