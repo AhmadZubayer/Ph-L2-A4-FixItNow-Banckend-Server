@@ -551,6 +551,80 @@ const updateRefundStatusIntoDB = async (
   }
 };
 
+const getMyPaymentsFromDB = async (customerId: string) => {
+  return prisma.payment.findMany({
+    where: {
+      booking: {
+        customerId,
+      },
+    },
+    select: {
+      id: true,
+      transactionId: true,
+      bookingId: true,
+      amount: true,
+      provider: true,
+      status: true,
+      paidAt: true,
+      createdAt: true,
+      booking: {
+        select: {
+          status: true,
+          service: {
+            select: {
+              title: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
+const getPaymentByIdFromDB = async (id: string, customerId: string) => {
+  const payment = await prisma.payment.findFirst({
+    where: {
+      id,
+      booking: {
+        customerId,
+      },
+    },
+    select: {
+      id: true,
+      transactionId: true,
+      bookingId: true,
+      amount: true,
+      method: true,
+      provider: true,
+      status: true,
+      paidAt: true,
+      createdAt: true,
+      updatedAt: true,
+      booking: {
+        select: {
+          status: true,
+          startAt: true,
+          endAt: true,
+          service: {
+            select: {
+              title: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!payment) {
+    throw new AppError(httpStatus.NOT_FOUND, "Payment not found");
+  }
+
+  return payment;
+};
+
 export const paymentService = {
   getPayableBookingFromDB,
   createPaymentIntoDB,
@@ -558,4 +632,6 @@ export const paymentService = {
   closePendingPaymentIntoDB,
   refundCancelledBookingPaymentIntoDB,
   updateRefundStatusIntoDB,
+  getMyPaymentsFromDB,
+  getPaymentByIdFromDB
 };

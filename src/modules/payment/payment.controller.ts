@@ -24,7 +24,44 @@ const createPayment = catchAsync(async (req: Request, res: Response, next: NextF
     });
 });
 
+const getMyPayments = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+        throw new AppError(httpStatus.UNAUTHORIZED, "Please log in to access this resource");
+    }
+
+    const payments = await paymentService.getMyPaymentsFromDB(req.user.id);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Payments retrieved successfully",
+        data: payments
+    });
+});
+
+const getPaymentById = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+        throw new AppError(httpStatus.UNAUTHORIZED, "Please log in to access this resource");
+    }
+
+    const { id } = res.locals.validatedParams as { id: string };
+
+    const payment = await paymentService.getPaymentByIdFromDB(
+        id,
+        req.user.id
+    );
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Payment retrieved successfully",
+        data: payment
+    });
+});
+
 
 export const paymentController = {
-    createPayment
+    createPayment,
+    getMyPayments,
+    getPaymentById
 }

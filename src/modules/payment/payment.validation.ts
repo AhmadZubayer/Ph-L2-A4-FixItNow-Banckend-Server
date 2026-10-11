@@ -6,6 +6,11 @@ const createPaymentSchema = z.object({
     provider: z.enum(PaymentProvider).optional()
 });
 
+const getPaymentParamsSchema = z.object({
+    id: z.uuid("A valid payment ID is required")
+});
+
 export const paymentValidation = {
-    createPaymentSchema
+    createPaymentSchema,
+    getPaymentParamsSchema
 }

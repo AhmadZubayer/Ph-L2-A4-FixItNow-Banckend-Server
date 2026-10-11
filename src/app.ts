@@ -14,7 +14,8 @@ import { publicTechnicianRoutes, technicianRoutes } from "./modules/technician/t
 import { serviceRoutes, technicianServiceRoutes } from "./modules/service/service.route";
 import { availabilityRoutes } from "./modules/availability/availability.route";
 import { bookingRoutes, technicianBookingRoutes } from "./modules/booking/booking.route";
-import { stripeWebhookRoutes } from "./modules/payment/providers/stripe/stripe.route";
+import { stripeReturnRoutes, stripeWebhookRoutes } from "./modules/payment/providers/stripe/stripe.route";
+import { paymentRoutes } from "./modules/payment/payment.route";
 
 const app : Application = express();
 
@@ -46,6 +47,8 @@ app.use("/api/services", serviceRoutes);
 app.use("/api/technician/availability", availabilityRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/technician/bookings", technicianBookingRoutes);
+app.use("/api/payments/return", stripeReturnRoutes);
+app.use("/api/payments", paymentRoutes);
 
 app.use(notFound);
 app.use(globalErrorHandler);

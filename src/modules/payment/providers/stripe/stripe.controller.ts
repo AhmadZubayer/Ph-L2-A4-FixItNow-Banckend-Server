@@ -18,6 +18,20 @@ const handleStripeWebhook = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const showSuccessReturn = (_req: Request, res: Response) => {
+    res.status(httpStatus.OK).send(
+        "Payment submitted. We are confirming it with Stripe. Check your booking status shortly."
+    );
+};
+
+const showCancelReturn = (_req: Request, res: Response) => {
+    res.status(httpStatus.OK).send(
+        "You left Stripe Checkout. No payment was confirmed on this page."
+    );
+};
+
 export const stripeController = {
-    handleStripeWebhook
+    handleStripeWebhook,
+    showSuccessReturn,
+    showCancelReturn
 }
