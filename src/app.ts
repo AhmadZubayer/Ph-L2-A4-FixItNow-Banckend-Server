@@ -17,6 +17,7 @@ import { bookingRoutes, technicianBookingRoutes } from "./modules/booking/bookin
 import { stripeReturnRoutes, stripeWebhookRoutes } from "./modules/payment/providers/stripe/stripe.route";
 import { paymentRoutes } from "./modules/payment/payment.route";
 import { reviewRoutes } from "./modules/review/review.route";
+import { adminRoutes } from "./modules/admin/admin.route";
 
 const app : Application = express();
 
@@ -40,6 +41,7 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/admin/categories", adminCategoryRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/technician", technicianRoutes);
 app.use("/api/technician/services", technicianServiceRoutes);

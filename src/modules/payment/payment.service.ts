@@ -625,6 +625,46 @@ const getPaymentByIdFromDB = async (id: string, customerId: string) => {
   return payment;
 };
 
+const refundCancelledPaidBookingIntoDB = async (bookingId: string) => {
+  const payment = await prisma.payment.findFirst({
+    where: {
+      bookingId,
+      status: {
+        in: [
+          PaymentStatus.COMPLETED,
+          PaymentStatus.REFUND_PENDING,
+          PaymentStatus.REFUNDED,
+        ],
+      },
+    },
+    select: {
+      id: true,
+      provider: true,
+      providerTransactionId: true,
+      amount: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  if (!payment || !payment.providerTransactionId) {
+    throw new AppError(
+      httpStatus.CONFLICT,
+      "Paid booking payment was not found",
+    );
+  }
+
+  return refundCancelledBookingPaymentIntoDB({
+    paymentId: payment.id,
+    bookingId,
+    provider: payment.provider,
+    providerTransactionId: payment.providerTransactionId,
+    amount: payment.amount.toString(),
+    currency: "bdt",
+  });
+};
+
 export const paymentService = {
   getPayableBookingFromDB,
   createPaymentIntoDB,
@@ -633,5 +673,6 @@ export const paymentService = {
   refundCancelledBookingPaymentIntoDB,
   updateRefundStatusIntoDB,
   getMyPaymentsFromDB,
-  getPaymentByIdFromDB
+  getPaymentByIdFromDB,
+  refundCancelledPaidBookingIntoDB
 };

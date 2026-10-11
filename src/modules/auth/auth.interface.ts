@@ -10,3 +10,7 @@ export interface ILoginUser {
     password: string;
 }
 
+export interface IUpdateProfile {
+    name?: string;
+    email?: string;
+}

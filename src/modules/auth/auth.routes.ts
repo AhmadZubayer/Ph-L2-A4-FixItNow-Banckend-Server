@@ -29,3 +29,10 @@ authRoutes.post(
     validateRequest(authValidation.refreshTokenSchema),
     authController.refreshToken
 );
+
+authRoutes.patch(
+    "/me",
+    auth(),
+    validateRequest(authValidation.updateProfileSchema),
+    authController.updateProfile
+);

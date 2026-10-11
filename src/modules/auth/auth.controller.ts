@@ -62,9 +62,28 @@ const getMe = catchAsync(async (req: Request, res: Response, next: NextFunction)
     });
 });
 
+const updateProfile = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+        throw new AppError(httpStatus.UNAUTHORIZED, "Please log in to access this resource");
+    }
+
+    const user = await authService.updateProfileIntoDB(
+        req.user.id,
+        req.body
+    );
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Profile updated successfully",
+        data: user
+    });
+});
+
 export const authController = {
     registerUser,
     loginUser,
     refreshToken,
-    getMe
+    getMe,
+    updateProfile
 }

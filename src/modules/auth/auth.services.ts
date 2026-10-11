@@ -6,7 +6,8 @@ import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/appError";
 import { jwtUtils } from "../../utils/jwt";
-import { ILoginUser, IRegisterUser } from "./auth.interface";
+import { Prisma } from "../../../generated/prisma/client";
+import { ILoginUser, IRegisterUser, IUpdateProfile } from "./auth.interface";
 
 const registerUserIntoDB = async (payload: IRegisterUser) => {
     const { name, email, password, role } = payload;
@@ -125,8 +126,38 @@ const refreshToken = async (token: string) => {
     return { accessToken };
 }
 
+const updateProfileIntoDB = async (userId: string, payload: IUpdateProfile) => {
+    try {
+        return await prisma.user.update({
+            where: {
+                id: userId
+            },
+            data: {
+                name: payload.name,
+                email: payload.email?.toLowerCase()
+            },
+            omit: {
+                passwordHash: true
+            }
+        });
+    } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error.code === "P2002") {
+                throw new AppError(httpStatus.CONFLICT, "A user with this email already exists");
+            }
+
+            if (error.code === "P2025") {
+                throw new AppError(httpStatus.NOT_FOUND, "User not found");
+            }
+        }
+
+        throw error;
+    }
+}
+
 export const authService = {
     registerUserIntoDB,
     loginUser,
-    refreshToken
+    refreshToken,
+    updateProfileIntoDB
 }
