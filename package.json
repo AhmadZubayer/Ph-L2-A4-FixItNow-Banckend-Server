@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "dev": "tsx watch ./src/server.ts",
     "postinstall": "prisma generate",
-    "build": "prisma generate && tsc --noEmit",
+    "build": "prisma generate && tsup",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts"
   },
@@ -45,6 +46,7 @@
     "stripe": "^23.0.0",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1",
+    "tsup": "^8.5.1",
     "zod": "^4.6.5"
   }
 }
