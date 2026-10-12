@@ -6,17 +6,22 @@ export const logger = pino({
   level: "info",
   redact: ["req.headers.authorization", "req.headers.cookie"],
   transport: {
-    targets: [
-      {
-        target: isProduction ? "pino/file" : "pino-pretty",
-        options: isProduction
-          ? { destination: 1 } // terminal
-          : { colorize: true },
-      },
-      {
-        target: "pino/file",
-        options: { destination: "./logs/app.log", mkdir: true },
-      },
-    ],
+    targets: isProduction
+      ? [
+          {
+            target: "pino/file",
+            options: { destination: 1 },
+          },
+        ]
+      : [
+          {
+            target: "pino-pretty",
+            options: { colorize: true },
+          },
+          {
+            target: "pino/file",
+            options: { destination: "./logs/app.log", mkdir: true },
+          },
+        ],
   },
 });
