@@ -9,7 +9,7 @@ export const globalErrorHandler = (err: any, req: Request, res: Response, next: 
         success: false,
         message,
         errorDetails: err.errorDetails || (
-            process.env.APP_ENV === "production" ? null : err.stack
+            process.env.NODE_ENV === "production" ? null : err.stack
         )
     })
 }
