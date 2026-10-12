@@ -1,6 +1,6 @@
 import pino from "pino";
 
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction = process.env.APP_ENV === "production";
 
 export const logger = pino({
   level: "info",
