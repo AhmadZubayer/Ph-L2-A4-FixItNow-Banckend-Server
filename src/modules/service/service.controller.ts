@@ -23,6 +23,18 @@ const createService = catchAsync(async (req: Request, res: Response, next: NextF
     });
 });
 
+const updateService = catchAsync(async (req: Request, res: Response) => {
+    if (!req.user) throw new AppError(httpStatus.UNAUTHORIZED, "Please log in to access this resource");
+    const { id } = res.locals.validatedParams as { id: string };
+    const service = await serviceService.updateServiceIntoDB(req.user.id, id, req.body);
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Service updated successfully",
+        data: service
+    });
+});
+
 const getAllServices = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const filters = res.locals.validatedQuery as IServiceFilters;
 
@@ -38,5 +50,6 @@ const getAllServices = catchAsync(async (req: Request, res: Response, next: Next
 
 export const serviceController = {
     createService,
+    updateService,
     getAllServices
 }

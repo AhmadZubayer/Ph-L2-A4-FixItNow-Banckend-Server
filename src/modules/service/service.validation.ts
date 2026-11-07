@@ -12,6 +12,13 @@ const createServiceSchema = z.object({
     categoryId: z.uuid("A valid category ID is required")
 });
 
+const updateServiceSchema = createServiceSchema.partial().extend({ isActive: z.boolean().optional() }).refine(
+    payload => Object.keys(payload).length > 0,
+    { message: "Provide at least one service field" }
+);
+
+const serviceParamsSchema = z.object({ id: z.uuid("A valid service ID is required") });
+
 const filterPriceSchema = z.string().trim().regex(
     /^\d{1,8}(\.\d{1,2})?$/,
     "Price must have at most 2 decimal places"
@@ -37,5 +44,7 @@ const getServicesQuerySchema = z.object({
 
 export const serviceValidation = {
     createServiceSchema,
+    updateServiceSchema,
+    serviceParamsSchema,
     getServicesQuerySchema
 }

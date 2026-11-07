@@ -23,6 +23,19 @@ const setAvailability = catchAsync(async (req: Request, res: Response, next: Nex
     });
 });
 
+const blockAvailability = catchAsync(async (req: Request, res: Response) => {
+    if (!req.user) throw new AppError(httpStatus.UNAUTHORIZED, "Please log in to access this resource");
+    const { id } = res.locals.validatedParams as { id: string };
+    const slot = await availabilityService.blockAvailabilityIntoDB(req.user.id, id);
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Availability blocked successfully",
+        data: slot
+    });
+});
+
 export const availabilityController = {
-    setAvailability
+    setAvailability,
+    blockAvailability
 }

@@ -39,6 +39,9 @@ const setAvailabilitySchema = z.object({
     message: "Availability slots must not overlap"
 });
 
+const blockAvailabilityParamsSchema = z.object({ id: z.uuid("A valid slot ID is required") });
+
 export const availabilityValidation = {
-    setAvailabilitySchema
+    setAvailabilitySchema,
+    blockAvailabilityParamsSchema
 }

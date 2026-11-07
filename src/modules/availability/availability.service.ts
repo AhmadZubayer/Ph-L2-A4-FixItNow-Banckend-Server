@@ -107,6 +107,27 @@ const setAvailabilityIntoDB = async (userId: string, payload: ISetAvailability) 
     });
 }
 
+const blockAvailabilityIntoDB = async (userId: string, id: string) => {
+    const updated = await prisma.availabilitySlot.updateMany({
+        where: {
+            id,
+            isActive: true,
+            startAt: { gt: new Date() },
+            technicianProfile: { userId },
+            bookings: {
+                none: {
+                    status: { in: [BookingStatus.REQUESTED, BookingStatus.ACCEPTED, BookingStatus.PAID, BookingStatus.IN_PROGRESS] }
+                }
+            }
+        },
+        data: { isActive: false }
+    });
+
+    if (updated.count === 0) throw new AppError(httpStatus.CONFLICT, "This slot cannot be blocked");
+    return prisma.availabilitySlot.findUniqueOrThrow({ where: { id } });
+}
+
 export const availabilityService = {
-    setAvailabilityIntoDB
+    setAvailabilityIntoDB,
+    blockAvailabilityIntoDB
 }

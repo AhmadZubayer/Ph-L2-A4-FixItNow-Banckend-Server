@@ -26,6 +26,45 @@ const updateTechnicianProfileIntoDB = async (
   return profile;
 };
 
+const getMyTechnicianProfileFromDB = async (userId: string) => {
+  return prisma.technicianProfile.findUnique({
+    where: { userId },
+    select: {
+      id: true,
+      bio: true,
+      skills: true,
+      experienceYears: true,
+      location: true,
+      profilePhoto: true,
+      services: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          price: true,
+          durationMinutes: true,
+          categoryId: true,
+          isActive: true,
+        },
+      },
+      availabilitySlots: {
+        where: { startAt: { gt: new Date() } },
+        select: {
+          id: true,
+          startAt: true,
+          endAt: true,
+          isActive: true,
+          bookings: {
+            where: { status: { in: [BookingStatus.REQUESTED, BookingStatus.ACCEPTED, BookingStatus.PAID, BookingStatus.IN_PROGRESS] } },
+            select: { status: true },
+          },
+        },
+        orderBy: { startAt: "asc" },
+      },
+    },
+  });
+};
+
 const getTechnicianByIdFromDB = async (id: string) => {
   const technician = await prisma.technicianProfile.findFirst({
     where: {
@@ -256,6 +295,7 @@ const getAllTechniciansFromDB = async (filters: ITechnicianFilters = {}) => {
 
 export const technicianService = {
   updateTechnicianProfileIntoDB,
+    getMyTechnicianProfileFromDB,
   getAllTechniciansFromDB,
   getTechnicianByIdFromDB,
 };

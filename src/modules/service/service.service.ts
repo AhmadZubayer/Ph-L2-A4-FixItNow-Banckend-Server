@@ -37,6 +37,21 @@ const createServiceIntoDB = async (userId: string, payload: ICreateService) => {
     return service;
 }
 
+const updateServiceIntoDB = async (userId: string, id: string, payload: Partial<ICreateService> & { isActive?: boolean }) => {
+    if (payload.categoryId) {
+        const category = await prisma.category.findFirst({ where: { id: payload.categoryId, isActive: true } });
+        if (!category) throw new AppError(httpStatus.NOT_FOUND, "Active category not found");
+    }
+
+    const updated = await prisma.service.updateMany({
+        where: { id, technicianProfile: { userId } },
+        data: payload
+    });
+
+    if (updated.count === 0) throw new AppError(httpStatus.NOT_FOUND, "Service not found");
+    return prisma.service.findUniqueOrThrow({ where: { id } });
+}
+
 const getAllServicesFromDB = async (filters: IServiceFilters = {}) => {
     // Start with services that are visible to the public.
     const where: Prisma.ServiceWhereInput = {
@@ -169,5 +184,6 @@ const getAllServicesFromDB = async (filters: IServiceFilters = {}) => {
 
 export const serviceService = {
     createServiceIntoDB,
+    updateServiceIntoDB,
     getAllServicesFromDB
 }

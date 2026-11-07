@@ -10,6 +10,12 @@ import { validateQuery } from "../../middlewares/validateQuery";
 export const technicianRoutes = Router();
 export const publicTechnicianRoutes = Router();
 
+technicianRoutes.get(
+    "/profile",
+    auth(UserRole.TECHNICIAN),
+    technicianController.getMyTechnicianProfile
+);
+
 technicianRoutes.put(
     "/profile",
     auth(UserRole.TECHNICIAN),

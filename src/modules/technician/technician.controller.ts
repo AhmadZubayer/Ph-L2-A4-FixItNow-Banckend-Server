@@ -24,6 +24,20 @@ const updateTechnicianProfile = catchAsync(async (req: Request, res: Response, n
     });
 });
 
+const getMyTechnicianProfile = catchAsync(async (req: Request, res: Response) => {
+    if (!req.user) {
+        throw new AppError(httpStatus.UNAUTHORIZED, "Please log in to access this resource");
+    }
+
+    const profile = await technicianService.getMyTechnicianProfileFromDB(req.user.id);
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Technician profile retrieved successfully",
+        data: profile
+    });
+});
+
 const getAllTechnicians = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const filters = res.locals.validatedQuery as ITechnicianFilters;
 
@@ -52,6 +66,7 @@ const getTechnicianById = catchAsync(async (req: Request, res: Response, next: N
 
 export const technicianController = {
     updateTechnicianProfile,
+    getMyTechnicianProfile,
     getAllTechnicians,
     getTechnicianById
 }
