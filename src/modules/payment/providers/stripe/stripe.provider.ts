@@ -6,8 +6,8 @@ import { AppError } from "../../../../utils/appError";
 import { ICreateCheckoutPayload, IPaymentProvider, IRefundPayment } from "../../payment.interface";
 
 const createCheckoutSession = async (payload: ICreateCheckoutPayload) => {
-    if (!config.server_url) {
-        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, "SERVER_URL is not configured");
+    if (!config.app_url) {
+        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, "APP_URL is not configured");
     }
 
     if (payload.currency.toLowerCase() !== "bdt") {
@@ -20,7 +20,7 @@ const createCheckoutSession = async (payload: ICreateCheckoutPayload) => {
         throw new AppError(httpStatus.CONFLICT, "Booking price is invalid");
     }
 
-    const serverUrl = config.server_url.replace(/\/$/, "");
+    const appUrl = config.app_url.replace(/\/$/, "");
 
     const session = await stripe.checkout.sessions.create({
         mode: "payment",
@@ -42,8 +42,8 @@ const createCheckoutSession = async (payload: ICreateCheckoutPayload) => {
             bookingId: payload.bookingId,
             paymentId: payload.paymentId
         },
-        success_url: `${serverUrl}/api/payments/return/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${serverUrl}/api/payments/return/cancel`
+        success_url: `${appUrl}/payment/success?paymentId=${encodeURIComponent(payload.paymentId)}&bookingId=${encodeURIComponent(payload.bookingId)}`,
+        cancel_url: `${appUrl}/payment/cancel?bookingId=${encodeURIComponent(payload.bookingId)}`
     });
 
     if (!session.url) {
