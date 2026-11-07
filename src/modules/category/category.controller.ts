@@ -39,8 +39,20 @@ const getAllCategoriesForAdmin = catchAsync(async (req: Request, res: Response, 
     });
 });
 
+const updateCategory = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = res.locals.validatedParams as { id: string };
+    const category = await categoryService.updateCategoryIntoDB(id, req.body);
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Category updated successfully",
+        data: category
+    });
+});
+
 export const categoryController = {
     createCategory,
     getAllCategories,
-    getAllCategoriesForAdmin
+    getAllCategoriesForAdmin,
+    updateCategory
 }

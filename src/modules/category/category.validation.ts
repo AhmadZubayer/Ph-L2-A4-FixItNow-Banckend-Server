@@ -9,6 +9,14 @@ const createCategorySchema = z.object({
     description: z.string().trim().optional()
 });
 
+const updateCategorySchema = createCategorySchema.partial().extend({
+    isActive: z.boolean().optional()
+}).refine((value) => Object.keys(value).length > 0, "At least one field is required");
+
+const categoryParamsSchema = z.object({ id: z.uuid("A valid category ID is required") });
+
 export const categoryValidation = {
-    createCategorySchema
+    createCategorySchema,
+    updateCategorySchema,
+    categoryParamsSchema
 }

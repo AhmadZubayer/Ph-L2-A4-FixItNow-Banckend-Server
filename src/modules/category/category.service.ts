@@ -2,6 +2,7 @@ import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/appError";
 import { ICreateCategory } from "./category.interface";
+import { Prisma } from "../../../generated/prisma/client";
 
 const createCategoryIntoDB = async (payload: ICreateCategory) => {
     const isCategoryExist = await prisma.category.findFirst({
@@ -47,8 +48,30 @@ const getAllCategoriesForAdminFromDB = async () => {
     return categories;
 }
 
+const updateCategoryIntoDB = async (id: string, payload: Partial<ICreateCategory> & { isActive?: boolean }) => {
+    const duplicate = await prisma.category.findFirst({
+        where: {
+            id: { not: id },
+            OR: [
+                ...(payload.name ? [{ name: payload.name }] : []),
+                ...(payload.slug ? [{ slug: payload.slug }] : [])
+            ]
+        }
+    });
+    if (duplicate) throw new AppError(httpStatus.CONFLICT, "Category name or slug already exists");
+    try {
+        return await prisma.category.update({ where: { id }, data: payload });
+    } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+            throw new AppError(httpStatus.NOT_FOUND, "Category not found");
+        }
+        throw error;
+    }
+}
+
 export const categoryService = {
     createCategoryIntoDB,
     getAllCategoriesFromDB,
-    getAllCategoriesForAdminFromDB
+    getAllCategoriesForAdminFromDB,
+    updateCategoryIntoDB
 }
