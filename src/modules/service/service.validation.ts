@@ -25,6 +25,7 @@ const filterPriceSchema = z.string().trim().regex(
 );
 
 const getServicesQuerySchema = z.object({
+    q: z.string().trim().min(1).max(100).optional(),
     categoryId: z.uuid("A valid category ID is required").optional(),
     location: z.string().trim().min(2, "Location must contain at least 2 characters").optional(),
     minPrice: filterPriceSchema.optional(),
@@ -32,7 +33,9 @@ const getServicesQuerySchema = z.object({
     minRating: z.string().trim().min(1)
         .transform(Number)
         .pipe(z.number().min(0).max(5))
-        .optional()
+        .optional(),
+    priceSort: z.enum(["asc", "desc"]).optional(),
+    ratingSort: z.enum(["asc", "desc"]).optional()
 }).refine(
     filters => !filters.minPrice || !filters.maxPrice ||
         Number(filters.minPrice) <= Number(filters.maxPrice),

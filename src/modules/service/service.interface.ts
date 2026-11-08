@@ -7,9 +7,12 @@ export interface ICreateService {
 }
 
 export interface IServiceFilters {
+    q?: string;
     categoryId?: string;
     location?: string;
     minPrice?: string;
     maxPrice?: string;
     minRating?: number;
+    priceSort?: "asc" | "desc";
+    ratingSort?: "asc" | "desc";
 }

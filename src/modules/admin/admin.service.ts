@@ -4,6 +4,7 @@ import { ActiveStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/appError";
 import { IUpdateUserStatus } from "./admin.interface";
+import { calculatePaymentShares } from "./payment-shares";
 
 
 const getAllUsersFromDB = async () => {
@@ -105,8 +106,42 @@ const getAllBookingsFromDB = async () => {
     return bookings;
 }
 
+const getAllPaymentsFromDB = async () => {
+    const payments = await prisma.payment.findMany({
+        select: {
+            id: true,
+            amount: true,
+            method: true,
+            provider: true,
+            status: true,
+            paidAt: true,
+            createdAt: true,
+            booking: {
+                select: {
+                    customer: { select: { id: true, name: true } },
+                    service: {
+                        select: {
+                            title: true,
+                            technicianProfile: {
+                                select: { user: { select: { id: true, name: true } } }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        orderBy: { createdAt: "desc" }
+    });
+
+    return payments.map((payment) => ({
+        ...payment,
+        ...calculatePaymentShares(payment.amount, payment.status)
+    }));
+}
+
 export const adminService = {
     getAllUsersFromDB,
     updateUserStatusIntoDB,
-    getAllBookingsFromDB
+    getAllBookingsFromDB,
+    getAllPaymentsFromDB
 }

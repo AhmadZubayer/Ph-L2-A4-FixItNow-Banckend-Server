@@ -27,3 +27,9 @@ adminRoutes.get(
     auth(UserRole.ADMIN),
     adminController.getAllBookings
 );
+
+adminRoutes.get(
+    "/payments",
+    auth(UserRole.ADMIN),
+    adminController.getAllPayments
+);

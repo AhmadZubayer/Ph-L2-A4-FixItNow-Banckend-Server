@@ -109,27 +109,23 @@ const getTechnicianByIdFromDB = async (id: string) => {
       },
       availabilitySlots: {
         where: {
-          isActive: true,
           startAt: {
             gt: new Date(),
           },
-          bookings: {
-            none: {
-              status: {
-                in: [
-                  BookingStatus.REQUESTED,
-                  BookingStatus.ACCEPTED,
-                  BookingStatus.PAID,
-                  BookingStatus.IN_PROGRESS,
-                ],
-              },
-            },
-          },
+          OR: [
+            { isActive: true },
+            { bookings: { some: { status: { in: [BookingStatus.REQUESTED, BookingStatus.ACCEPTED, BookingStatus.PAID, BookingStatus.IN_PROGRESS] } } } },
+          ],
         },
         select: {
           id: true,
           startAt: true,
           endAt: true,
+          isActive: true,
+          bookings: {
+            where: { status: { in: [BookingStatus.REQUESTED, BookingStatus.ACCEPTED, BookingStatus.PAID, BookingStatus.IN_PROGRESS] } },
+            select: { status: true },
+          },
         },
         orderBy: {
           startAt: "asc",
@@ -180,16 +176,17 @@ const getAllTechniciansFromDB = async (filters: ITechnicianFilters = {}) => {
     },
   };
 
-  if (filters.categoryId) {
-    where.services = {
-      some: {
-        isActive: true,
-        categoryId: filters.categoryId,
-        category: {
-          isActive: true,
-        },
-      },
-    };
+  const serviceWhere: Prisma.ServiceWhereInput = {
+    isActive: true,
+    category: { isActive: true },
+  };
+  if (filters.categoryId) serviceWhere.categoryId = filters.categoryId;
+  if (filters.serviceId) serviceWhere.id = filters.serviceId;
+  if (filters.minPrice || filters.maxPrice) {
+    serviceWhere.price = { gte: filters.minPrice, lte: filters.maxPrice };
+  }
+  if (filters.categoryId || filters.serviceId || filters.minPrice || filters.maxPrice) {
+    where.services = { some: serviceWhere };
   }
 
   if (filters.location) {
@@ -197,6 +194,15 @@ const getAllTechniciansFromDB = async (filters: ITechnicianFilters = {}) => {
       contains: filters.location,
       mode: "insensitive",
     };
+  }
+
+  if (filters.q) {
+    where.OR = [
+      { user: { name: { contains: filters.q, mode: "insensitive" } } },
+      { bio: { contains: filters.q, mode: "insensitive" } },
+      { services: { some: { ...serviceWhere, title: { contains: filters.q, mode: "insensitive" } } } },
+      { services: { some: { ...serviceWhere, description: { contains: filters.q, mode: "insensitive" } } } },
+    ];
   }
 
   const technicians = await prisma.technicianProfile.findMany({
@@ -215,12 +221,7 @@ const getAllTechniciansFromDB = async (filters: ITechnicianFilters = {}) => {
         },
       },
       services: {
-        where: {
-          isActive: true,
-          category: {
-            isActive: true,
-          },
-        },
+        where: serviceWhere,
         select: {
           id: true,
           title: true,
@@ -240,7 +241,7 @@ const getAllTechniciansFromDB = async (filters: ITechnicianFilters = {}) => {
   });
 
   if (technicians.length === 0) {
-    return [];
+    return { technicians: [], meta: { page: filters.page ?? 1, limit: filters.limit ?? 9, total: 0 } };
   }
 
   // Calculate an average rating for each technician in the list.
@@ -282,15 +283,34 @@ const getAllTechniciansFromDB = async (filters: ITechnicianFilters = {}) => {
     };
   });
 
-  const minRating = filters.minRating;
+  const visible = filters.minRating === undefined ? techniciansWithRatings : techniciansWithRatings.filter(
+    (technician) => technician.averageRating >= filters.minRating!,
+  );
+  const startingPrice = (technician: typeof visible[number]) => technician.services.length
+    ? Math.min(...technician.services.map((service) => Number(service.price)))
+    : Number.POSITIVE_INFINITY;
+  visible.sort((first, second) => {
+    if (filters.priceSort) {
+      const firstPrice = startingPrice(first);
+      const secondPrice = startingPrice(second);
+      if (!Number.isFinite(firstPrice)) return Number.isFinite(secondPrice) ? 1 : 0;
+      if (!Number.isFinite(secondPrice)) return -1;
+      const difference = firstPrice - secondPrice;
+      if (difference) return filters.priceSort === "asc" ? difference : -difference;
+    }
+    if (filters.ratingSort) {
+      const difference = first.averageRating - second.averageRating;
+      if (difference) return filters.ratingSort === "asc" ? difference : -difference;
+    }
+    return first.user.name.localeCompare(second.user.name);
+  });
 
-  if (minRating !== undefined) {
-    return techniciansWithRatings.filter(
-      (technician) => technician.averageRating >= minRating,
-    );
-  }
-
-  return techniciansWithRatings;
+  const page = filters.page ?? 1;
+  const limit = filters.limit ?? 9;
+  const techniciansPage = filters.page || filters.limit
+    ? visible.slice((page - 1) * limit, page * limit)
+    : visible;
+  return { technicians: techniciansPage, meta: { page, limit, total: visible.length } };
 };
 
 export const technicianService = {

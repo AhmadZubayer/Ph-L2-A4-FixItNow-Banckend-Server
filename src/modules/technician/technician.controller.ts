@@ -41,13 +41,14 @@ const getMyTechnicianProfile = catchAsync(async (req: Request, res: Response) =>
 const getAllTechnicians = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const filters = res.locals.validatedQuery as ITechnicianFilters;
 
-    const technicians = await technicianService.getAllTechniciansFromDB(filters);
+    const { technicians, meta } = await technicianService.getAllTechniciansFromDB(filters);
 
     sendResponse(res, {
         success: true,
         statusCode: httpStatus.OK,
         message: "Technicians retrieved successfully",
-        data: technicians
+        data: technicians,
+        meta: filters.page || filters.limit ? meta : undefined
     });
 });
 

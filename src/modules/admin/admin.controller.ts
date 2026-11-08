@@ -48,8 +48,20 @@ const getAllBookings = catchAsync(async (req: Request, res: Response, next: Next
     });
 });
 
+const getAllPayments = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const payments = await adminService.getAllPaymentsFromDB();
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Payments retrieved successfully",
+        data: payments
+    });
+});
+
 export const adminController = {
     getAllUsers,
     updateUserStatus,
-    getAllBookings
+    getAllBookings,
+    getAllPayments
 }

@@ -87,6 +87,14 @@ const getAllServicesFromDB = async (filters: IServiceFilters = {}) => {
         };
     }
 
+    if (filters.q) {
+        where.OR = [
+            { title: { contains: filters.q, mode: "insensitive" } },
+            { description: { contains: filters.q, mode: "insensitive" } },
+            { technicianProfile: { user: { name: { contains: filters.q, mode: "insensitive" } } } }
+        ];
+    }
+
     // Keep services within the requested price range.
     if (filters.minPrice || filters.maxPrice) {
         where.price = {
@@ -171,15 +179,21 @@ const getAllServicesFromDB = async (filters: IServiceFilters = {}) => {
     });
 
      // If requested, keep only technicians meeting the minimum rating.
-    const minRating = filters.minRating;
+    const visible = filters.minRating === undefined ? servicesWithRatings : servicesWithRatings.filter(
+        service => service.technicianProfile.averageRating >= filters.minRating!
+    );
 
-    if (minRating !== undefined) {
-        return servicesWithRatings.filter(
-            service => service.technicianProfile.averageRating >= minRating
-        );
-    }
-
-    return servicesWithRatings;
+    return visible.sort((first, second) => {
+        if (filters.priceSort) {
+            const priceDifference = first.price.comparedTo(second.price);
+            if (priceDifference) return filters.priceSort === "asc" ? priceDifference : -priceDifference;
+        }
+        if (filters.ratingSort) {
+            const ratingDifference = first.technicianProfile.averageRating - second.technicianProfile.averageRating;
+            if (ratingDifference) return filters.ratingSort === "asc" ? ratingDifference : -ratingDifference;
+        }
+        return second.createdAt.getTime() - first.createdAt.getTime();
+    });
 }
 
 export const serviceService = {
