@@ -10,6 +10,7 @@ export interface ITechnicianFilters {
     q?: string;
     categoryId?: string;
     serviceId?: string;
+    serviceTitle?: string;
     location?: string;
     minRating?: number;
     minPrice?: string;

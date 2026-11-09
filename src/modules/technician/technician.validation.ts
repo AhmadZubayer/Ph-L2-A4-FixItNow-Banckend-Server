@@ -18,6 +18,7 @@ const getTechniciansQuerySchema = z.object({
     q: z.string().trim().min(1).max(100).optional(),
     categoryId: z.uuid("A valid category ID is required").optional(),
     serviceId: z.uuid("A valid service ID is required").optional(),
+    serviceTitle: z.string().trim().min(1).optional(),
     location: z.string().trim().min(2, "Location must contain at least 2 characters").optional(),
     minRating: z.string().trim().min(1)
         .transform(Number)

@@ -182,10 +182,11 @@ const getAllTechniciansFromDB = async (filters: ITechnicianFilters = {}) => {
   };
   if (filters.categoryId) serviceWhere.categoryId = filters.categoryId;
   if (filters.serviceId) serviceWhere.id = filters.serviceId;
+  if (filters.serviceTitle) serviceWhere.title = { equals: filters.serviceTitle, mode: "insensitive" };
   if (filters.minPrice || filters.maxPrice) {
     serviceWhere.price = { gte: filters.minPrice, lte: filters.maxPrice };
   }
-  if (filters.categoryId || filters.serviceId || filters.minPrice || filters.maxPrice) {
+  if (filters.categoryId || filters.serviceId || filters.serviceTitle || filters.minPrice || filters.maxPrice) {
     where.services = { some: serviceWhere };
   }
 
@@ -200,7 +201,7 @@ const getAllTechniciansFromDB = async (filters: ITechnicianFilters = {}) => {
     where.OR = [
       { user: { name: { contains: filters.q, mode: "insensitive" } } },
       { bio: { contains: filters.q, mode: "insensitive" } },
-      { services: { some: { ...serviceWhere, title: { contains: filters.q, mode: "insensitive" } } } },
+      { services: { some: { AND: [serviceWhere, { title: { contains: filters.q, mode: "insensitive" } }] } } },
       { services: { some: { ...serviceWhere, description: { contains: filters.q, mode: "insensitive" } } } },
     ];
   }

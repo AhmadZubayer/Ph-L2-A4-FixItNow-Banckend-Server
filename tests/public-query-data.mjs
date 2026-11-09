@@ -45,14 +45,15 @@ try {
   prisma.review.groupBy = async () => [];
 
   const result = await technicianService.getAllTechniciansFromDB({
-    q: "fan", categoryId, serviceId, minPrice: "100", page: 2, limit: 9, priceSort: "desc",
+    q: "fan", categoryId, serviceId, serviceTitle: "Ceiling Fan Repair", minPrice: "100", page: 2, limit: 9, priceSort: "desc",
   });
   assert.deepEqual(result.meta, { page: 2, limit: 9, total: 12 });
   assert.deepEqual(result.technicians.map((technician) => technician.id), ["t3", "t2", "t1"]);
   assert.equal(technicianQuery.where.services.some.id, serviceId);
   assert.equal(technicianQuery.where.services.some.categoryId, categoryId);
   assert.equal(technicianQuery.where.services.some.price.gte, "100");
-  assert.equal(technicianQuery.where.OR[2].services.some.title.contains, "fan");
+  assert.deepEqual(technicianQuery.where.services.some.title, { equals: "Ceiling Fan Repair", mode: "insensitive" });
+  assert.equal(technicianQuery.where.OR[2].services.some.AND[1].title.contains, "fan");
   assert.equal(technicianQuery.select.services.where.id, serviceId);
 
   let profileQuery;
