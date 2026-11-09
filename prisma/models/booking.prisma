@@ -19,9 +19,26 @@ model Booking {
 
   payments Payment[]
   review Review?
+  items BookingItem[]
 
   @@index([customerId])
   @@index([serviceId])
   @@index([availabilitySlotId])
   @@map("bookings")
+}
+
+model BookingItem {
+  bookingId       String
+  booking         Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  serviceId       String
+  service         Service @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  position        Int
+  title           String
+  price           Decimal @db.Decimal(10, 2)
+  durationMinutes Int
+
+  @@id([bookingId, serviceId])
+  @@unique([bookingId, position])
+  @@index([serviceId])
+  @@map("booking_items")
 }

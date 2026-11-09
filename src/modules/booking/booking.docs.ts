@@ -13,11 +13,16 @@
  *         application/json:
  *           schema:
  *             type: object
- *             required: [serviceId, availabilitySlotId]
+ *             required: [serviceIds, availabilitySlotId]
  *             properties:
- *               serviceId:
- *                 type: string
- *                 format: uuid
+ *               serviceIds:
+ *                 type: array
+ *                 minItems: 1
+ *                 maxItems: 50
+ *                 uniqueItems: true
+ *                 items:
+ *                   type: string
+ *                   format: uuid
  *               availabilitySlotId:
  *                 type: string
  *                 format: uuid
@@ -25,7 +30,7 @@
  *       201:
  *         description: Booking created with REQUESTED status
  *       400:
- *         description: Invalid IDs or slot is too short for the service
+ *         description: Invalid selection or slot is too short for the combined services
  *       401:
  *         description: Access token is missing or invalid
  *       403:

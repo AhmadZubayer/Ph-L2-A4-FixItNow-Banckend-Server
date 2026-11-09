@@ -72,6 +72,7 @@ const getAllBookingsFromDB = async () => {
             startAt: true,
             endAt: true,
             priceAtBooking: true,
+            items: { orderBy: { position: "asc" }, select: { title: true } },
             createdAt: true,
             customer: {
                 select: {

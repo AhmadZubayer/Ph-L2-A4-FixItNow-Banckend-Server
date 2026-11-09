@@ -14,6 +14,7 @@ import {
 } from "./payment.interface";
 import { getPaymentProvider } from "./providers/paymentProvider.factory";
 import { Prisma } from "../../../generated/prisma/client";
+import { bookingItems } from "../booking/booking-items";
 
 const getPayableBookingFromDB = async (
   customerId: string,
@@ -28,6 +29,7 @@ const getPayableBookingFromDB = async (
       id: true,
       status: true,
       priceAtBooking: true,
+      items: bookingItems,
       customer: {
         select: {
           email: true,
@@ -156,7 +158,9 @@ const createPaymentIntoDB = async (
       paymentId: payment.id,
       amount: booking.priceAtBooking.toString(),
       currency: "bdt",
-      serviceTitle: booking.service.title,
+      serviceTitle: booking.items.length > 1
+        ? `${booking.items.length} FixItNow services`
+        : booking.items[0]?.title ?? booking.service.title,
       customerEmail: booking.customer.email,
     });
   } catch (error) {
@@ -570,6 +574,7 @@ const getMyPaymentsFromDB = async (customerId: string) => {
       booking: {
         select: {
           status: true,
+          items: bookingItems,
           service: {
             select: {
               title: true,
@@ -608,6 +613,7 @@ const getPaymentByIdFromDB = async (id: string, customerId: string) => {
           status: true,
           startAt: true,
           endAt: true,
+          items: bookingItems,
           service: {
             select: {
               title: true,

@@ -4,6 +4,8 @@ import { paymentService } from "../payment/payment.service";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/appError";
 import { ICreateBooking } from "./booking.interface";
+import { Prisma } from "../../../generated/prisma/client";
+import { bookingItems } from "./booking-items";
 
 // createBookingIntoDB
 // getMyBookingsFromDB
@@ -28,10 +30,9 @@ const createBookingIntoDB = async (customerId: string, payload: ICreateBooking) 
     const now = new Date();
 
     return prisma.$transaction(async transaction => {
-        // Find an active service offered by an active technician.
-        const service = await transaction.service.findFirst({
+        const services = await transaction.service.findMany({
             where: {
-                id: payload.serviceId,
+                id: { in: payload.serviceIds },
                 isActive: true,
                 category: {
                     isActive: true
@@ -44,21 +45,33 @@ const createBookingIntoDB = async (customerId: string, payload: ICreateBooking) 
             },
             select: {
                 id: true,
+                title: true,
                 price: true,
                 durationMinutes: true,
                 technicianProfileId: true
             }
         });
 
-        if (!service) {
-            throw new AppError(httpStatus.NOT_FOUND, "Service not found");
+        if (services.length !== payload.serviceIds.length) {
+            throw new AppError(httpStatus.NOT_FOUND, "One or more selected services are unavailable");
         }
 
-        // The slot must belong to this service's technician and be in the future.
+        const servicesById = new Map(services.map(service => [service.id, service]));
+        const selected = payload.serviceIds.map(id => servicesById.get(id)!);
+        const primary = selected[0];
+        if (!primary || selected.some(service => service.technicianProfileId !== primary.technicianProfileId)) {
+            throw new AppError(httpStatus.BAD_REQUEST, "Select services from one technician");
+        }
+        const duration = selected.reduce((total, service) => total + service.durationMinutes, 0);
+        const price = selected.reduce((total, service) => total.plus(service.price), new Prisma.Decimal(0));
+        if (price.gt("99999999.99")) {
+            throw new AppError(httpStatus.BAD_REQUEST, "The combined price exceeds the booking limit");
+        }
+
         const slot = await transaction.availabilitySlot.findFirst({
             where: {
                 id: payload.availabilitySlotId,
-                technicianProfileId: service.technicianProfileId,
+                technicianProfileId: primary.technicianProfileId,
                 isActive: true,
                 startAt: {
                     gt: now
@@ -77,8 +90,8 @@ const createBookingIntoDB = async (customerId: string, payload: ICreateBooking) 
 
         const slotLengthMinutes = (slot.endAt.getTime() - slot.startAt.getTime()) / 60000;
 
-        if (slotLengthMinutes < service.durationMinutes) {
-            throw new AppError(httpStatus.BAD_REQUEST, "This slot is too short for the service");
+        if (slotLengthMinutes < duration) {
+            throw new AppError(httpStatus.BAD_REQUEST, "This slot is too short for the selected services");
         }
 
         // Claim the slot only if it is still free.
@@ -110,13 +123,19 @@ const createBookingIntoDB = async (customerId: string, payload: ICreateBooking) 
         return transaction.booking.create({
             data: {
                 customerId,
-                serviceId: service.id,
+                serviceId: primary.id,
                 availabilitySlotId: slot.id,
                 startAt: slot.startAt,
                 endAt: slot.endAt,
-                priceAtBooking: service.price,
-                status: BookingStatus.REQUESTED
-            }
+                priceAtBooking: price,
+                status: BookingStatus.REQUESTED,
+                items: {
+                    create: selected.map(({ id, title, price, durationMinutes }, position) => ({
+                        serviceId: id, title, price, durationMinutes, position
+                    }))
+                }
+            },
+            include: { items: bookingItems }
         });
     });
 }
@@ -134,6 +153,7 @@ const getMyBookingsFromDB = async (customerId: string) => {
             priceAtBooking: true,
             availabilitySlotId: true,
             createdAt: true,
+            items: bookingItems,
             service: {
                 select: {
                     id: true,
@@ -173,6 +193,7 @@ const getBookingByIdFromDB = async (id: string, customerId: string) => {
             availabilitySlotId: true,
             createdAt: true,
             updatedAt: true,
+            items: bookingItems,
             service: {
                 select: {
                     id: true,
@@ -226,6 +247,7 @@ const getTechnicianBookingsFromDB = async (technicianUserId: string) => {
             priceAtBooking: true,
             availabilitySlotId: true,
             createdAt: true,
+            items: bookingItems,
             customer: {
                 select: {
                     id: true,

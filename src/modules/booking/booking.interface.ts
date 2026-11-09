@@ -1,4 +1,4 @@
 export interface ICreateBooking {
-    serviceId: string;
+    serviceIds: string[];
     availabilitySlotId: string;
 }

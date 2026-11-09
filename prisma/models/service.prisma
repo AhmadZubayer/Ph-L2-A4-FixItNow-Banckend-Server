@@ -15,6 +15,7 @@ model Service {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   bookings Booking[]
+  bookingItems BookingItem[]
 
   @@index([technicianProfileId])
   @@index([categoryId])
