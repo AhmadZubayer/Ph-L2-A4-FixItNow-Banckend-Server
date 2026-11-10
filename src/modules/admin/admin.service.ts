@@ -140,7 +140,21 @@ const getAllPaymentsFromDB = async () => {
     }));
 }
 
+const getAllFeedbacksFromDB = async () => prisma.review.findMany({
+    select: {
+        id: true,
+        rating: true,
+        comment: true,
+        createdAt: true,
+        customer: { select: { name: true } },
+        technicianProfile: { select: { user: { select: { name: true } } } },
+        booking: { select: { service: { select: { title: true } }, items: { orderBy: { position: "asc" }, select: { title: true } } } }
+    },
+    orderBy: { createdAt: "desc" }
+});
+
 export const adminService = {
+    getAllFeedbacksFromDB,
     getAllUsersFromDB,
     updateUserStatusIntoDB,
     getAllBookingsFromDB,

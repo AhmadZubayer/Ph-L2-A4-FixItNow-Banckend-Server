@@ -59,7 +59,18 @@ const getAllPayments = catchAsync(async (req: Request, res: Response, next: Next
     });
 });
 
+const getAllFeedbacks = catchAsync(async (_req: Request, res: Response) => {
+    const feedbacks = await adminService.getAllFeedbacksFromDB();
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Feedbacks retrieved successfully",
+        data: feedbacks
+    });
+});
+
 export const adminController = {
+    getAllFeedbacks,
     getAllUsers,
     updateUserStatus,
     getAllBookings,

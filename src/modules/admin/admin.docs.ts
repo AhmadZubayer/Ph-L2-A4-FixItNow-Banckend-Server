@@ -1,5 +1,23 @@
 /**
  * @openapi
+ * /api/admin/feedbacks:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: List customer feedback from completed bookings
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Reviews with customer, technician, service, rating, comment and date, newest first
+ *       401:
+ *         description: Access token is missing or invalid
+ *       403:
+ *         description: User is not an admin or account is blocked
+ */
+
+/**
+ * @openapi
  * /api/admin/users:
  *   get:
  *     tags:

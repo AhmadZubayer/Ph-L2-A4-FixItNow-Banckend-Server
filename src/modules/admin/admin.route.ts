@@ -8,6 +8,8 @@ import { adminValidation } from "./admin.validation";
 
 export const adminRoutes = Router();
 
+adminRoutes.get("/feedbacks", auth(UserRole.ADMIN), adminController.getAllFeedbacks);
+
 adminRoutes.get(
     "/users",
     auth(UserRole.ADMIN),
