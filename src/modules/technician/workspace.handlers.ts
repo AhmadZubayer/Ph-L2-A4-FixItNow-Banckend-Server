@@ -21,4 +21,3 @@ export const serviceSuggestions = catchAsync(async (req, res) => {
     select: { title: true, categoryId: true }, distinct: ["title", "categoryId"], orderBy: { title: "asc" }, take: 20 });
   res.json({ data: rows });
 });
-

@@ -200,7 +200,7 @@ FixItNow-backend-server/
 | 16 | Update, pause, resume, or withdraw own service | `PATCH /api/technician/services/:id` | Technician |
 | 17 | Search service suggestions | `GET /api/technician/services/suggestions` | Technician |
 | 18 | Set availability | `PUT /api/technician/availability` | Technician |
-| 19 | Block or unblock availability slot | `PATCH /api/technician/availability/:id/block` | Technician |
+| 19 | Block availability slot | `PATCH /api/technician/availability/:id/block` | Technician |
 | 20 | Create booking | `POST /api/bookings` | Customer |
 | 21 | List own bookings | `GET /api/bookings` | Customer |
 | 22 | View own booking | `GET /api/bookings/:id` | Customer |
