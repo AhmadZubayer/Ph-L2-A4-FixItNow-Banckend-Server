@@ -240,6 +240,7 @@ FixItNow-backend-server/
 - [Service service](docs/serviceService.md)
 - [Technician service](docs/technicianService.md)
 - [Stripe payment flow](docs/Stripe.md)
+- [Deployment and verification](docs/deployment.md)
 - [Database schema notes](docs/DatabaseSchema.md)
 
 ## 9. Project Development

@@ -4,6 +4,9 @@ generated/
 logs/
 .env
 .env.production
+.env.*
+!.env.example
+.vercel/
 /generated/prisma
 .agents
 .claude

@@ -8,6 +8,8 @@
     "dev": "tsx watch ./src/server.ts",
     "postinstall": "prisma generate",
     "build": "prisma generate && tsup",
+    "typecheck": "tsc --noEmit",
+    "check:deploy": "npm run build && npm run typecheck && node scripts/check-deployment.mjs",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts"
   },
