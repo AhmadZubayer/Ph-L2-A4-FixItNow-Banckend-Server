@@ -571,6 +571,7 @@ const getMyPaymentsFromDB = async (customerId: string) => {
       status: true,
       paidAt: true,
       createdAt: true,
+      updatedAt: true,
       booking: {
         select: {
           status: true,

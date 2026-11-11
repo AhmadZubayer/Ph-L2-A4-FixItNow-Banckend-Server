@@ -190,28 +190,39 @@ FixItNow-backend-server/
 | 6 | List categories | `GET /api/categories` | Public |
 | 7 | Add category | `POST /api/admin/categories` | Admin |
 | 8 | List categories for admin | `GET /api/admin/categories` | Admin |
-| 9 | List technicians | `GET /api/technicians` | Public |
-| 10 | View technician | `GET /api/technicians/:id` | Public |
-| 11 | Update technician profile | `PUT /api/technician/profile` | Technician |
-| 12 | List services | `GET /api/services` | Public |
-| 13 | Add service | `POST /api/technician/services` | Technician |
-| 14 | Set availability | `PUT /api/technician/availability` | Technician |
-| 15 | Create booking | `POST /api/bookings` | Customer |
-| 16 | List own bookings | `GET /api/bookings` | Customer |
-| 17 | View own booking | `GET /api/bookings/:id` | Customer |
-| 18 | Cancel booking | `PATCH /api/bookings/:id/cancel` | Customer |
-| 19 | List assigned bookings | `GET /api/technician/bookings` | Technician |
-| 20 | Update booking status | `PATCH /api/technician/bookings/:id` | Technician |
-| 21 | Start payment | `POST /api/payments/create` | Customer |
-| 22 | List own payments | `GET /api/payments` | Customer |
-| 23 | View own payment | `GET /api/payments/:id` | Customer |
-| 24 | Submit review | `POST /api/reviews` | Customer |
-| 25 | List users | `GET /api/admin/users` | Admin |
-| 26 | Update user status | `PATCH /api/admin/users/:id` | Admin |
-| 27 | List all bookings | `GET /api/admin/bookings` | Admin |
-| 28 | Receive Stripe events | `POST /api/payments/webhook` | Stripe |
-| 29 | Payment success return | `GET /api/payments/return/success` | Public |
-| 30 | Payment cancel return | `GET /api/payments/return/cancel` | Public |
+| 9 | Update category | `PATCH /api/admin/categories/:id` | Admin |
+| 10 | List technicians | `GET /api/technicians` | Public |
+| 11 | View technician | `GET /api/technicians/:id` | Public |
+| 12 | View own technician profile, services, and availability | `GET /api/technician/profile` | Technician |
+| 13 | Update technician profile | `PUT /api/technician/profile` | Technician |
+| 14 | List services | `GET /api/services` | Public |
+| 15 | Add service for admin approval | `POST /api/technician/services` | Technician |
+| 16 | Update, pause, resume, or withdraw own service | `PATCH /api/technician/services/:id` | Technician |
+| 17 | Search service suggestions | `GET /api/technician/services/suggestions` | Technician |
+| 18 | Set availability | `PUT /api/technician/availability` | Technician |
+| 19 | Block or unblock availability slot | `PATCH /api/technician/availability/:id/block` | Technician |
+| 20 | Create booking | `POST /api/bookings` | Customer |
+| 21 | List own bookings | `GET /api/bookings` | Customer |
+| 22 | View own booking | `GET /api/bookings/:id` | Customer |
+| 23 | Cancel booking | `PATCH /api/bookings/:id/cancel` | Customer |
+| 24 | List assigned bookings | `GET /api/technician/bookings` | Technician |
+| 25 | Update booking status | `PATCH /api/technician/bookings/:id` | Technician |
+| 26 | Start payment | `POST /api/payments/create` | Customer |
+| 27 | List own payments | `GET /api/payments` | Customer |
+| 28 | View own payment | `GET /api/payments/:id` | Customer |
+| 29 | List technician payments and shares | `GET /api/technician/payments` | Technician |
+| 30 | Submit review | `POST /api/reviews` | Customer |
+| 31 | List users | `GET /api/admin/users` | Admin |
+| 32 | Update user status | `PATCH /api/admin/users/:id` | Admin |
+| 33 | List all bookings | `GET /api/admin/bookings` | Admin |
+| 34 | List all payments and revenue shares | `GET /api/admin/payments` | Admin |
+| 35 | List customer feedback | `GET /api/admin/feedbacks` | Admin |
+| 36 | List services for moderation | `GET /api/admin/services` | Admin |
+| 37 | Approve, reject, pause, resume, or delete service | `PATCH /api/admin/services/:id` | Admin |
+| 38 | Receive Stripe events | `POST /api/payments/webhook` | Stripe |
+| 39 | Payment success return | `GET /api/payments/return/success` | Public |
+| 40 | Payment cancel return | `GET /api/payments/return/cancel` | Public |
+| 41 | Check server and database health | `GET /health` | Public |
 
 ## 7. Data Flow
 

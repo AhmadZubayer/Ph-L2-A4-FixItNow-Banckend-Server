@@ -12,7 +12,7 @@ const createServiceSchema = z.object({
     categoryId: z.uuid("A valid category ID is required")
 });
 
-const updateServiceSchema = createServiceSchema.partial().extend({ isActive: z.boolean().optional() }).refine(
+const updateServiceSchema = createServiceSchema.partial().extend({ isActive: z.boolean().optional(), action: z.enum(["cancel", "pause", "resume"]).optional() }).refine(
     payload => Object.keys(payload).length > 0,
     { message: "Provide at least one service field" }
 );

@@ -5,8 +5,11 @@ import { adminController } from "./admin.controller";
 import { validateParams } from "../../middlewares/validateParams";
 import { validateRequest } from "../../middlewares/validateRequest";
 import { adminValidation } from "./admin.validation";
+import { adminServices, approveService } from "./admin-services.controller";
 
 export const adminRoutes = Router();
+adminRoutes.get("/services", auth(UserRole.ADMIN), adminServices);
+adminRoutes.patch("/services/:id", auth(UserRole.ADMIN), approveService);
 
 adminRoutes.get("/feedbacks", auth(UserRole.ADMIN), adminController.getAllFeedbacks);
 

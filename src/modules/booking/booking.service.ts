@@ -153,6 +153,10 @@ const getMyBookingsFromDB = async (customerId: string) => {
             priceAtBooking: true,
             availabilitySlotId: true,
             createdAt: true,
+            updatedAt: true,
+            review: {
+                select: { id: true, rating: true, comment: true, createdAt: true }
+            },
             items: bookingItems,
             service: {
                 select: {
@@ -247,6 +251,8 @@ const getTechnicianBookingsFromDB = async (technicianUserId: string) => {
             priceAtBooking: true,
             availabilitySlotId: true,
             createdAt: true,
+            updatedAt: true,
+            review: { select: { id: true, rating: true, comment: true, createdAt: true } },
             items: bookingItems,
             customer: {
                 select: {

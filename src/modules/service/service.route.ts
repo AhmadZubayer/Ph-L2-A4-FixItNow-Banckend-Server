@@ -6,9 +6,11 @@ import { serviceController } from "./service.controller";
 import { serviceValidation } from "./service.validation";
 import { validateQuery } from "../../middlewares/validateQuery";
 import { validateParams } from "../../middlewares/validateParams";
+import { serviceSuggestions } from "../technician/workspace.handlers";
 
 export const technicianServiceRoutes = Router();
 export const serviceRoutes = Router();
+technicianServiceRoutes.get("/suggestions", auth(UserRole.TECHNICIAN), serviceSuggestions);
 
 technicianServiceRoutes.post(
     "/",

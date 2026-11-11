@@ -5,6 +5,9 @@ model Service {
   price           Decimal  @db.Decimal(10, 2)
   durationMinutes Int
   isActive        Boolean  @default(true)
+  isApproved      Boolean  @default(false)
+  isCancelled     Boolean  @default(false)
+  isAdminPaused   Boolean  @default(false)
 
   technicianProfileId String
   technicianProfile   TechnicianProfile @relation(fields: [technicianProfileId], references: [id])

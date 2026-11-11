@@ -4,6 +4,7 @@ import { AppError } from "../../utils/appError";
 import { ICreateService, IServiceFilters } from "./service.interface";
 import { ActiveStatus } from "../../../generated/prisma/enums";
 import { Prisma } from "../../../generated/prisma/client";
+import type { ServiceFlags } from "./service-moderation";
 
 const createServiceIntoDB = async (userId: string, payload: ICreateService) => {
     const technicianProfile = await prisma.technicianProfile.findUnique({
@@ -30,6 +31,7 @@ const createServiceIntoDB = async (userId: string, payload: ICreateService) => {
     const service = await prisma.service.create({
         data: {
             ...payload,
+            isActive: false,
             technicianProfileId: technicianProfile.id
         }
     });
@@ -37,19 +39,27 @@ const createServiceIntoDB = async (userId: string, payload: ICreateService) => {
     return service;
 }
 
-const updateServiceIntoDB = async (userId: string, id: string, payload: Partial<ICreateService> & { isActive?: boolean }) => {
-    if (payload.categoryId) {
-        const category = await prisma.category.findFirst({ where: { id: payload.categoryId, isActive: true } });
+const updateServiceIntoDB = async (userId: string, id: string, payload: Partial<ICreateService> & { isActive?: boolean; action?: "cancel" | "pause" | "resume" }) => {
+    return prisma.$transaction(async transaction => {
+      const [flags] = await transaction.$queryRaw<ServiceFlags[]>`
+        SELECT s.id, s."isApproved", s."isCancelled", s."isAdminPaused" FROM services s
+        JOIN technician_profiles t ON t.id=s."technicianProfileId" WHERE s.id=${id} AND t."userId"=${userId} FOR UPDATE OF s`;
+      if (!flags) throw new AppError(httpStatus.NOT_FOUND, "Service not found");
+      if (flags.isCancelled) throw new AppError(httpStatus.CONFLICT, "This service has been withdrawn");
+      if (payload.action === "cancel") {
+        await transaction.$executeRaw`UPDATE services SET "isActive"=false, "isCancelled"=true, "updatedAt"=NOW() WHERE id=${id}`;
+        return { id, isActive: false, isCancelled: true };
+      }
+      const changes = payload.action ? { isActive: payload.action === "resume" } : payload;
+      const editsDetails = Object.keys(changes).some(key => key !== "isActive");
+      if (changes.isActive && (!flags.isApproved || flags.isAdminPaused || editsDetails)) throw new AppError(httpStatus.CONFLICT, "Admin approval is required and an admin-paused service cannot be resumed");
+      if (changes.categoryId) {
+        const category = await transaction.category.findFirst({ where: { id: changes.categoryId, isActive: true } });
         if (!category) throw new AppError(httpStatus.NOT_FOUND, "Active category not found");
-    }
-
-    const updated = await prisma.service.updateMany({
-        where: { id, technicianProfile: { userId } },
-        data: payload
+      }
+      if (editsDetails) await transaction.$executeRaw`UPDATE services SET "isApproved"=false WHERE id=${id}`;
+      return transaction.service.update({ where: { id }, data: { ...changes, ...(editsDetails ? { isActive: false } : {}) } });
     });
-
-    if (updated.count === 0) throw new AppError(httpStatus.NOT_FOUND, "Service not found");
-    return prisma.service.findUniqueOrThrow({ where: { id } });
 }
 
 const getAllServicesFromDB = async (filters: IServiceFilters = {}) => {

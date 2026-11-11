@@ -6,9 +6,11 @@ import { technicianController } from "./technician.controller";
 import { technicianValidation } from "./technician.validation";
 import { validateParams } from "../../middlewares/validateParams";
 import { validateQuery } from "../../middlewares/validateQuery";
+import { technicianPayments } from "./workspace.handlers";
 
 export const technicianRoutes = Router();
 export const publicTechnicianRoutes = Router();
+technicianRoutes.get("/payments", auth(UserRole.TECHNICIAN), technicianPayments);
 
 technicianRoutes.get(
     "/profile",

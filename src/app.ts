@@ -18,6 +18,8 @@ import { stripeReturnRoutes, stripeWebhookRoutes } from "./modules/payment/provi
 import { paymentRoutes } from "./modules/payment/payment.route";
 import { reviewRoutes } from "./modules/review/review.route";
 import { adminRoutes } from "./modules/admin/admin.route";
+import { prisma } from "./lib/prisma";
+import { sendResponse } from "./utils/sendResponse";
 
 const app : Application = express();
 
@@ -34,6 +36,30 @@ app.use(pinoHttp({ logger }));
 
 app.get("/",(req : Request, res : Response) => {
     res.send("FixItNow Backend Server. Navigate to /docs for API documentation");
+});
+
+app.get("/health", async (_req: Request, res: Response) => {
+    res.setHeader("Cache-Control", "no-store");
+
+    try {
+        await prisma.$queryRaw`SELECT 1`;
+
+        sendResponse(res, {
+            success: true,
+            statusCode: 200,
+            message: "Backend is running and database is connected.",
+            data: { server: "running", database: "connected" },
+        });
+    } catch (error) {
+        logger.error({ err: error }, "Health check database query failed");
+
+        sendResponse(res, {
+            success: false,
+            statusCode: 503,
+            message: "Backend is running but database is unavailable.",
+            data: { server: "running", database: "disconnected" },
+        });
+    }
 });
 
 

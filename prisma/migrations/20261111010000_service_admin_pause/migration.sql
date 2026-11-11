@@ -1,0 +1,1 @@
+ALTER TABLE "services" ADD COLUMN "isAdminPaused" BOOLEAN NOT NULL DEFAULT false;

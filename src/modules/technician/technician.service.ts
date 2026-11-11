@@ -7,6 +7,7 @@ import { ActiveStatus, BookingStatus } from "../../../generated/prisma/enums";
 import httpStatus from "http-status";
 import { AppError } from "../../utils/appError";
 import { Prisma } from "../../../generated/prisma/client";
+import { serviceFlags } from "../service/service-moderation";
 
 const updateTechnicianProfileIntoDB = async (
   userId: string,
@@ -27,7 +28,7 @@ const updateTechnicianProfileIntoDB = async (
 };
 
 const getMyTechnicianProfileFromDB = async (userId: string) => {
-  return prisma.technicianProfile.findUnique({
+  const profile = await prisma.technicianProfile.findUnique({
     where: { userId },
     select: {
       id: true,
@@ -63,6 +64,9 @@ const getMyTechnicianProfileFromDB = async (userId: string) => {
       },
     },
   });
+  if (!profile) return null;
+  const flags = await serviceFlags(profile.id);
+  return { ...profile, services: profile.services.map(service => ({ ...service, ...flags.find(flag => flag.id === service.id) })) };
 };
 
 const getTechnicianByIdFromDB = async (id: string) => {
